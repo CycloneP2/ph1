@@ -28,8 +28,9 @@ jobs:
           curl -L https://github.com/theos/sdks/archive/master.zip -o sdks.zip
           unzip -q sdks.zip
           mkdir -p $THEOS/sdks
-          mv -f sdks-master/* $THEOS/sdks/
+          mv -f sdks-master/* $THEOS/sdks/ || true
           rm -rf sdks-master sdks.zip
+          ls -R $THEOS/makefiles/common.mk
         env:
           THEOS: ${{ github.workspace }}/theos
 
@@ -42,7 +43,7 @@ jobs:
         if: ${{ github.event.inputs.build_for == 'jailbreak' || github.event.inputs.build_for == 'both' }}
         run: |
           cd tweak
-          make package FINALPACKAGE=1
+          make package FINALPACKAGE=1 THEOS=$THEOS
         continue-on-error: false
 
       - name: Build for Sideload (Titanox)
@@ -50,7 +51,7 @@ jobs:
         run: |
           cd tweak
           export ADDITIONAL_CFLAGS="-DNON_JAILBREAK=1"
-          make package FINALPACKAGE=1
+          make package FINALPACKAGE=1 THEOS=$THEOS
         continue-on-error: false
 
       - name: Upload .deb (Jailbreak)
