@@ -1,8 +1,0 @@
-Package: com.edgy.hacks
-Name: EDGY HACKS
-Version: 1.0.0
-Architecture: iphoneos-arm
-Description: ESP + Menu for MLBB (sideload support)
-Maintainer: EdgyTeam
-Author: EdgyTeam
-Section: Tweaks
