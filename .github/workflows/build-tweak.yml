@@ -28,7 +28,7 @@ jobs:
           curl -L https://github.com/theos/sdks/archive/master.zip -o sdks.zip
           unzip -q sdks.zip
           mkdir -p $THEOS/sdks
-          cp -r sdks-master/* $THEOS/sdks/
+          mv -f sdks-master/* $THEOS/sdks/
           rm -rf sdks-master sdks.zip
         env:
           THEOS: ${{ github.workspace }}/theos
