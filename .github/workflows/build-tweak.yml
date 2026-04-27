@@ -35,7 +35,7 @@ jobs:
 
       - name: Set environment
         run: |
-          echo "THEOS=./theos" >> $GITHUB_ENV
+          echo "THEOS=${{ github.workspace }}/theos" >> $GITHUB_ENV
           echo "THEOS_DEVICE_IP=localhost" >> $GITHUB_ENV
 
       - name: Build for Jailbreak
