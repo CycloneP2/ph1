@@ -5,14 +5,18 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
-#ifdef JAILBREAK
-#import <substrate.h>
-#else
-// Support for non-jailbreak hooking (Titanox, Dobby, etc.)
-#import "Titanox/Titanox.h"
-#define MSHookFunction(target, replacement, original) TITANOX_HOOK_FUNCTION(target, replacement, original)
-#endif
 #import <mach-o/dyld.h>
+
+// Dynamic Hooking Helper
+void edgy_hook(void *target, void *replacement, void **original) {
+    void *h = dlsym(RTLD_DEFAULT, "MSHookFunction");
+    if (!h) h = dlsym(RTLD_DEFAULT, "TITANOX_HOOK_FUNCTION");
+    if (!h) h = dlsym(RTLD_DEFAULT, "DobbyHook");
+    if (h) {
+        ((void(*)(void*, void*, void**))h)(target, replacement, original);
+    }
+}
+#define MSHookFunction edgy_hook
 
 // ============================================
 // DATA STRUCTURES
