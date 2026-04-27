@@ -1,0 +1,55 @@
+// scan_results.txt - MLBB DUMP SCANNER (ARM64 / iOS)
+// Validated using dump.cs metadata.
+
+[VALIDATED - LANGSUNG DARI DUMP]
+
+// --- CORE INSTANCES & RVAs ---
+#define OFF_BATTLE_MANAGER_INST       0xADC8A0    // BattleManager.Instance (Address of pointer - ASUMSI)
+#define RVA_CAMERA_GET_MAIN           0x89FF130   // Camera.get_main (Static Method)
+#define RVA_WORLD_TO_SCREEN           0x89FE040   // Camera.WorldToScreenPoint (Method)
+#define RVA_FRAME_TIME_RECORDER_GET   0x347A0D0   // FrameTimeRecorder.get_Instance (Property)
+#define RVA_SET_ANTI_CHEAT_REPORT     0x4E75950   // ShowBattleControl.SetAntiCheatReport (Method)
+#define RVA_GET_CUR_CD                0x67BD63C   // ShowCoolDownComp.GetCurCD (Method)
+#define RVA_ML_ACCOUNT_LOGOUT         0x4617440   // MLAccountManager.Logout (Method)
+#define RVA_PLAYER_PREFS_DELETE_ALL   0x4A2F588   // PlayerPrefsTool.DeleteAll (Method)
+#define RVA_SET_CAMERA_FOV            0x4E608DC   // ShowBattleCamera_EGC.SetCameraFov (Method)
+
+// --- BattleManager Offsets ---
+#define OFF_LOCAL_PLAYER              0x50        // BattleManager -> m_LocalPlayerShow
+#define OFF_SHOW_PLAYERS              0x78        // BattleManager -> m_ShowPlayers
+#define OFF_SHOW_MONSTERS             0x80        // BattleManager -> m_ShowMonsters
+
+// --- ShowEntity / ShowPlayer Offsets ---
+#define OFF_ENTITY_POS                0x310       // ShowEntity.m_EntityObjPos (Vector3) - CRITICAL UPDATE
+#define OFF_ENTITY_CAMP               0xD8        // ShowEntity.m_EntityCampType (int)
+#define OFF_ENTITY_HP                 0x1AC       // ShowEntity.m_Hp (int)
+#define OFF_ENTITY_HP_MAX             0x1B0       // ShowEntity.m_HpMax (int)
+#define OFF_ENTITY_SHIELD             0x1B8       // ShowEntity.m_MechArmorHp (int/BackingField)
+#define OFF_ENTITY_IN_SCREEN          0x90        // ShowEntity.m_bInScreen (bool)
+#define OFF_ENTITY_IS_DEATH           0xCD        // ShowEntity.m_bDeath (bool)
+#define OFF_ENTITY_ID                 0x194       // ShowEntity.m_ID (int)
+#define OFF_ENTITY_TYPE               0x80        // ShowEntity.m_iType (int)
+#define OFF_PLAYER_HERO_NAME          0x918       // ShowPlayer.m_HeroName (string)
+#define OFF_MINIMAP_VISIBLE           0x2AF       // ShowEntity.m_bUnityMinimapVisible (bool)
+
+// --- ShowBattleControl Static Offsets (from static data block) ---
+#define OFF_SBC_ANTI_CHEAT_REPORT     0x71A       // ShowBattleControl.m_bAntiCheatReport (bool)
+#define OFF_SBC_CHECK_SKILL_RECORD    0x70F       // ShowBattleControl.m_bCheckAndReportSkillRecord (bool)
+
+// --- FrameTimeRecorder Offsets ---
+#define OFF_FTR_INSTANCE              0x0         // FrameTimeRecorder.instance (static pointer)
+#define OFF_FTR_CHEAT_FRAME_VALUE     0x538       // FrameTimeRecorder.mIsCheatCurrentFrameTimeValue (bool)
+#define OFF_FTR_FIX_COROUTINE         0x18        // FrameTimeRecorder.mIsEnableFixCheckFrameTimeCoroutine (static bool)
+
+// --- AntiPluginData Offsets ---
+#define OFF_APD_CHECK_TIME            0x28        // AntiPluginData.m_iCheckTime (int)
+#define OFF_APD_MIN_BATTLE_TIME       0x2C        // AntiPluginData.m_iMinBattleTime (int)
+
+[NOT_FOUND - PERLU SCAN ULANG]
+// NOT_FOUND_IN_DUMP: OFF_DRONE_SET_FOV (Found SetCameraFov method RVA instead)
+// NOT_FOUND_IN_DUMP: OFF_RADAR_VISIBLE (Using m_bUnityMinimapVisible at 0x2AF in ShowEntity)
+// NOT_FOUND_IN_DUMP: OFF_ENTITY_DISTANCE (Calculated at runtime, no static field)
+
+[ASUMSI - TIDAK DI DUMP]
+// ASUMSI: OFF_BATTLE_MANAGER_INST = 0xADC8A0 (Berdasarkan laporan external/runtime)
+// ASUMSI: RVA_CAMERA_MAIN = 0x89FF130 (Dari dump, tapi sering dipanggil via property)
