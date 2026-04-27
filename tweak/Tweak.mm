@@ -1,6 +1,4 @@
-// Tweak.mm - EDGY HACKS (STABILITY FIX + ESP LINE)
-// Optimized for MLBB - CORRECTED FOR STABILITY
-
+// Tweak.mm - EDGY HACKS (CLEAN VERSION)
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -33,24 +31,20 @@ typedef struct { float x, y, z; } Vector3;
 #define RVA_WORLD_TO_SCREEN     0x89FE040   
 #define RVA_CAMERA_MAIN         0x89FF130   
 
-#define RVA_SDK_REPORT_LOG      0x4CEB580
-#define RVA_SDK_REPORT_ERR      0x4CEB690
-
 // Tweak State
 static BOOL espEnabled = YES;
 static BOOL monsterEsp = NO;
 static BOOL snaplinesEnabled = YES;
 static BOOL showTeam = NO;
-static BOOL bypassDNS = YES;
+static BOOL bypassDNS = YES; // Placeholder for UI
 static BOOL showHeroName = YES;
-static float enemyR = 1.0, enemyG = 0.2, enemyB = 0.2; // Red for enemies
+static float enemyR = 1.0, enemyG = 0.2, enemyB = 0.2;
 
 static uintptr_t g_unityBase = 0;
 
 // ============================================
 // UTILITIES
 // ============================================
-
 uintptr_t get_base(const char* name) {
     uint32_t count = _dyld_image_count();
     for (uint32_t i = 0; i < count; i++) {
@@ -60,13 +54,10 @@ uintptr_t get_base(const char* name) {
     return 0;
 }
 
-// Memory safety check
-// Fix is_valid for arm64 iOS
 bool is_valid(uintptr_t ptr) {
     return (ptr > 0x100000000 && ptr < 0x2000000000 && (ptr & 0x3) == 0);
 }
 
-// Safer String Reading
 NSString* readIl2CppString(uintptr_t ptr) {
     if (!is_valid(ptr)) return nil;
     int len = *(int*)(ptr + 0x10);
@@ -79,7 +70,6 @@ NSString* readIl2CppString(uintptr_t ptr) {
 // ============================================
 // UI & ESP RENDERER
 // ============================================
-
 @interface EdgyESPView : UIView
 @end
 
@@ -94,12 +84,10 @@ NSString* readIl2CppString(uintptr_t ptr) {
     }
     return self;
 }
-
 - (void)redraw { [self setNeedsDisplay]; }
 
 void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vector3 (*w2s)(void*, Vector3), int myTeam, UIColor* color, BOOL isMonster) {
     if (!is_valid(list)) return;
-    
     uintptr_t arrayPtr = *(uintptr_t*)(list + 0x10);
     int size = *(int*)(list + 0x18);
     if (size <= 0 || size > 50 || !is_valid(arrayPtr)) return;
@@ -108,7 +96,6 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
         uintptr_t entity = *(uintptr_t*)(arrayPtr + 0x20 + (i * 8));
         if (!is_valid(entity)) continue;
 
-        // Monster Filtering
         if (isMonster) {
             int m_id = *(int*)(entity + OFF_ENTITY_ID);
             if (m_id != 1001 && m_id != 1002 && m_id != 2001 && m_id != 3001) continue;
@@ -132,7 +119,7 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
                 CGContextSetStrokeColorWithColor(ctx, color.CGColor);
                 CGContextSetLineWidth(ctx, 1.2);
                 CGContextBeginPath(ctx);
-                CGContextMoveToPoint(ctx, rect.size.width/2, rect.size.height/2); // Center
+                CGContextMoveToPoint(ctx, rect.size.width/2, rect.size.height/2);
                 CGContextAddLineToPoint(ctx, x, y);
                 CGContextStrokePath(ctx);
             }
@@ -141,7 +128,6 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
                 NSString *name = readIl2CppString(*(uintptr_t*)(entity + OFF_PLAYER_HERO_NAME));
                 if (name) [name drawAtPoint:CGPointMake(x-20, y-35) withAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor], NSFontAttributeName: [UIFont boldSystemFontOfSize:9]}];
             }
-            
             [[NSString stringWithFormat:@"%d", hp] drawAtPoint:CGPointMake(x-10, y-20) withAttributes:@{NSForegroundColorAttributeName: color, NSFontAttributeName: [UIFont boldSystemFontOfSize:10]}];
         }
     }
@@ -149,14 +135,12 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
 
 - (void)drawRect:(CGRect)rect {
     if (!espEnabled || !g_unityBase) return;
-    
     @try {
         uintptr_t bmAddr = *(uintptr_t*)(g_unityBase + RVA_BATTLE_MANAGER_INST);
         if (!is_valid(bmAddr)) return;
         uintptr_t bm = *(uintptr_t*)bmAddr; 
         if (!is_valid(bm)) return;
 
-        CGContextRef ctx = UIGraphicsGetCurrentContext();
         void* (*get_main)() = (void*(*)())(g_unityBase + RVA_CAMERA_MAIN);
         void* cam = get_main();
         if (!cam) return;
@@ -165,13 +149,12 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
         uintptr_t local = *(uintptr_t*)(bm + OFF_LOCAL_PLAYER);
         int myTeam = (is_valid(local)) ? *(int*)(local + OFF_ENTITY_CAMP) : 0;
         
+        CGContextRef ctx = UIGraphicsGetCurrentContext();
         UIColor *enemyColor = [UIColor colorWithRed:enemyR green:enemyG blue:enemyB alpha:1.0];
         
-        // Draw Players
         uintptr_t pList = *(uintptr_t*)(bm + OFF_SHOW_PLAYERS);
         drawEntities(ctx, rect, pList, cam, w2s, myTeam, enemyColor, NO);
         
-        // Draw Monsters
         if (monsterEsp) {
             uintptr_t mList = *(uintptr_t*)(bm + OFF_SHOW_MONSTERS);
             drawEntities(ctx, rect, mList, cam, w2s, myTeam, [UIColor yellowColor], YES);
@@ -199,17 +182,14 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
 }
 
 - (void)setupWithWindow:(UIWindow *)window {
-    // Add ESP Overlay
     EdgyESPView *espView = [[EdgyESPView alloc] initWithFrame:window.bounds];
     [window addSubview:espView];
 
-    // Add FAB
     self.fab = [UIButton buttonWithType:UIButtonTypeCustom];
     self.fab.frame = CGRectMake(50, 150, 60, 60);
     self.fab.backgroundColor = [UIColor colorWithRed:0.2 green:0.2 blue:0.8 alpha:0.9];
     self.fab.layer.cornerRadius = 30;
     [self.fab setTitle:@"EDGY" forState:UIControlStateNormal];
-    self.fab.titleLabel.font = [UIFont boldSystemFontOfSize:14];
     [self.fab addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
 
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
