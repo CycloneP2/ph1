@@ -22,13 +22,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create Theos directory
-        run: mkdir -p ./theos/sdks
-
       - name: Install Theos
         uses: Randomblock1/theos-action@v1
         with:
-          theos-dir: './theos'
+          theos-dir: ${{ github.workspace }}/theos
           theos-src: 'https://github.com/theos/theos'
           theos-sdks: 'https://github.com/theos/sdks'
 
