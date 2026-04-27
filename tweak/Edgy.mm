@@ -296,9 +296,11 @@ static void initialize() {
         g_unityBase = get_base("UnityFramework");
         if (g_unityBase) {
             // Hook Anti-Report (DNS Bypass)
+            /* 
             if (bypassDNS) {
                 MSHookFunction((void*)(g_unityBase + RVA_SDK_REPORT_LOG), (void*)hooked_Log, (void**)&old_Log);
             }
+            */
             
             UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
             if (keyWindow) {
