@@ -1,0 +1,9 @@
+Package: com.edgy.hacks
+Name: EDGY HACKS
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: EDGY HACKS - ESP & Anti-Report for MLBB
+Maintainer: EdgyTeam
+Author: EdgyTeam
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000)

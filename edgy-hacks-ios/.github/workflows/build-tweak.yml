@@ -1,0 +1,64 @@
+name: Build EDGY Hacks Tweak
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_for:
+        description: 'Target build (jailbreak/sideload)'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - jailbreak
+          - sideload
+          - both
+
+jobs:
+  build-tweak:
+    name: Build Tweak for iOS
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Theos
+        uses: Randomblock1/theos-action@v1
+        with:
+          theos-dir: './theos'
+          theos-src: 'https://github.com/theos/theos'
+          theos-sdks: 'https://github.com/theos/sdks'
+
+      - name: Set environment
+        run: |
+          echo "THEOS=./theos" >> $GITHUB_ENV
+          echo "THEOS_DEVICE_IP=localhost" >> $GITHUB_ENV
+
+      - name: Build for Jailbreak
+        if: ${{ github.event.inputs.build_for == 'jailbreak' || github.event.inputs.build_for == 'both' }}
+        run: |
+          cd tweak
+          make package FINALPACKAGE=1
+        continue-on-error: false
+
+      - name: Build for Sideload (Titanox)
+        if: ${{ github.event.inputs.build_for == 'sideload' || github.event.inputs.build_for == 'both' }}
+        run: |
+          cd tweak
+          export ADDITIONAL_CFLAGS="-DNON_JAILBREAK=1"
+          make package FINALPACKAGE=1
+        continue-on-error: false
+
+      - name: Upload .deb (Jailbreak)
+        if: ${{ github.event.inputs.build_for == 'jailbreak' || github.event.inputs.build_for == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: edgy-hacks-jailbreak
+          path: tweak/packages/*.deb
+
+      - name: Upload .dylib (Sideload)
+        if: ${{ github.event.inputs.build_for == 'sideload' || github.event.inputs.build_for == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: edgy-hacks-sideload
+          path: tweak/.theos/obj/debug/*.dylib
