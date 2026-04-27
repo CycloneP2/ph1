@@ -7,17 +7,6 @@
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
 
-// Dynamic Hooking Helper
-void edgy_hook(void *target, void *replacement, void **original) {
-    void *h = dlsym(RTLD_DEFAULT, "MSHookFunction");
-    if (!h) h = dlsym(RTLD_DEFAULT, "TITANOX_HOOK_FUNCTION");
-    if (!h) h = dlsym(RTLD_DEFAULT, "DobbyHook");
-    if (h) {
-        ((void(*)(void*, void*, void**))h)(target, replacement, original);
-    }
-}
-#define MSHookFunction edgy_hook
-
 // ============================================
 // DATA STRUCTURES
 // ============================================
@@ -86,12 +75,6 @@ NSString* readIl2CppString(uintptr_t ptr) {
     if (!is_valid(dataPtr)) return nil;
     return [NSString stringWithCharacters:(uint16_t*)dataPtr length:len];
 }
-
-// ============================================
-// ANTI-REPORT
-// ============================================
-static void (*old_Log)(void*);
-void hooked_Log(void* m) { if (bypassDNS) return; old_Log(m); }
 
 // ============================================
 // UI & ESP RENDERER
@@ -295,13 +278,6 @@ static void initialize() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         g_unityBase = get_base("UnityFramework");
         if (g_unityBase) {
-            // Hook Anti-Report (DNS Bypass)
-            /* 
-            if (bypassDNS) {
-                MSHookFunction((void*)(g_unityBase + RVA_SDK_REPORT_LOG), (void*)hooked_Log, (void**)&old_Log);
-            }
-            */
-            
             UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
             if (keyWindow) {
                 [[EdgyMenuManager shared] setupWithWindow:keyWindow];
