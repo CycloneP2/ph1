@@ -262,7 +262,7 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
             UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(180, y, 50, 30)];
             sw.on = *val;
             [sw addTarget:self action:@selector(swChanged:) forControlEvents:UIControlEventValueChanged];
-            objc_set_associatedObject(sw, "ptr", [NSValue valueWithPointer:val], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(sw, "ptr", [NSValue valueWithPointer:val], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             [self.menuView addSubview:sw];
         };
         
