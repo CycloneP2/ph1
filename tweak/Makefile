@@ -10,7 +10,7 @@ TWEAK_NAME = EdgyHacks
 # Source files
 EdgyHacks_FILES = Tweak.mm
 EdgyHacks_FRAMEWORKS = UIKit Foundation CoreGraphics QuartzCore
-EdgyHacks_CFLAGS = -fobjc-arc
+EdgyHacks_CFLAGS = -fobjc-arc -std=c++11
 
 # Handle Sideload flag
 ifeq ($(NON_JAILBREAK),1)

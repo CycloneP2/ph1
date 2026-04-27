@@ -280,7 +280,7 @@ void drawEntities(CGContextRef ctx, CGRect rect, uintptr_t list, void* cam, Vect
 }
 
 - (void)swChanged:(UISwitch *)s {
-    NSValue *val = objc_get_associatedObject(s, "ptr");
+    NSValue *val = objc_getAssociatedObject(s, "ptr");
     BOOL *ptr = (BOOL *)[val pointerValue];
     if (ptr) *ptr = s.on;
 }
